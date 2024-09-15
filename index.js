@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const port = 5000;
 const bodyparser = require('body-parser');
+const config = require('./config/key');
 const { User } = require('./models/User');
 const mongoose = require('mongoose');
 
@@ -11,7 +12,7 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 
 mongoose
-   .connect('mongodb+srv://vedivero:1234@cluster0.hmtbdny.mongodb.net/', {
+   .connect(config.mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
    })
