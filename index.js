@@ -36,7 +36,7 @@ app.post('/register', async (req, res) => {
 });
 
 // 로그인
-app.post('/login', async (req, res) => {
+app.post('/api/users/login', async (req, res) => {
    try {
       // 요청된 이메일을 데이터베이스에서 찾기
       const user = await User.findOne({ email: req.body.email });
