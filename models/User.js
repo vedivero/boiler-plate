@@ -32,29 +32,29 @@ const userSchema = mongoose.Schema({
 });
 
 // 회원정보 저장
-userSchema.pre('save', function (next) {
+userSchema.pre('save', async function (next) {
    let user = this;
-   if (user.isModified('password')) {
-      bcrypt.genSalt(saltRounds, (err, salt) => {
-         if (err) return next(err);
 
-         bcrypt.hash(user.password, salt, (err, hash) => {
-            if (err) return next(err);
-            user.password = hash;
-            next();
-         });
-      });
+   if (user.isModified('password')) {
+      try {
+         const salt = await bcrypt.genSalt(saltRounds); // 비동기적으로 salt 생성
+         user.password = await bcrypt.hash(user.password, salt); // 비동기적으로 비밀번호 해시 생성
+         next(); // 비밀번호 암호화가 완료되면 다음 미들웨어로 이동
+      } catch (err) {
+         next(err); // 에러 발생 시 에러 전달
+      }
    } else {
-      next();
+      next(); // 비밀번호가 변경되지 않았으면 다음 미들웨어로 이동
    }
 });
 
 // 암호화된 DB의 PASSWORD와 사용자가 입력한 PASSWORD를 암호화해서 비교
-userSchema.methods.comparePassword = function (plainPassword, callback) {
-   bcrypt.compare(plainPassword, this.password, (err, isMatch) => {
-      if (err) return callback(err); // 잘못된 부분 수정
-      callback(null, isMatch);
-   });
+userSchema.methods.comparePassword = async function (plainPassword) {
+   try {
+      return await bcrypt.compare(plainPassword, this.password);
+   } catch (err) {
+      throw new Error('비밀번호 비교 중 오류가 발생했습니다.');
+   }
 };
 
 // 로그인 성공한 user의 토큰 생성
