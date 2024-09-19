@@ -35,8 +35,7 @@ app.post('/register', async (req, res) => {
    }
 });
 
-// 로그인
-app.post('/api/users/login', async (req, res) => {
+app.post('/users/login', async (req, res) => {
    try {
       // 요청된 이메일을 데이터베이스에서 찾기
       const user = await User.findOne({ email: req.body.email });
@@ -48,41 +47,31 @@ app.post('/api/users/login', async (req, res) => {
       }
 
       // 요청된 이메일을 찾았다면 비밀번호가 일치하는지 확인
-      user.comparePassword(req.body.password, async (err, isMatch) => {
-         if (err)
-            return res.status(400).json({
-               loginSuccess: false,
-               error: '비밀번호 확인 중 오류가 발생했습니다.',
-            });
-         if (!isMatch) {
-            return res.json({
-               loginSuccess: false,
-               message: '비밀번호가 일치하지 않습니다.',
-            });
-         }
+      const isMatch = await user.comparePassword(req.body.password); // 콜백 대신 await로 처리
+      if (!isMatch) {
+         return res.json({
+            loginSuccess: false,
+            message: '비밀번호가 일치하지 않습니다.',
+         });
+      }
 
-         // 비밀번호가 일치 시, 토큰 생성
-         try {
-            const updatedUser = await user.generateToken(); // 프로미스 반환 처리
-            // 쿠키에 토큰 저장
-            res.cookie('x_auth', updatedUser.token).status(200).json({
-               loginSuccess: true,
-               userId: updatedUser._id,
-            });
-         } catch (err) {
-            return res.status(400).json({
-               loginSuccess: false,
-               error: '토큰 생성 중 오류가 발생했습니다.',
-            });
-         }
+      // 비밀번호 일치 시, 토큰 생성
+      const updatedUser = await user.generateToken();
+      // 쿠키에 토큰 저장
+      res.cookie('x_auth', updatedUser.token).status(200).json({
+         loginSuccess: true,
+         userId: updatedUser._id,
       });
    } catch (err) {
-      return res.status(500).json({ loginSuccess: false, error: err.message });
+      return res.status(500).json({
+         loginSuccess: false,
+         error: '로그인 중 에러가 발생했습니다.',
+      });
    }
 });
 
 //User Authentication Router
-app.get('/api/users/auth', auth, (req, res) => {
+app.get('/users/auth', auth, (req, res) => {
    res.status(200).json({
       _id: req.user._id,
       isAdmin: req.user.role === 0 ? false : true,
@@ -96,7 +85,7 @@ app.get('/api/users/auth', auth, (req, res) => {
 });
 
 // Logout Router
-app.get('/api/users/logout', auth, async (req, res) => {
+app.get('/users/logout', auth, async (req, res) => {
    try {
       await User.findOneAndUpdate({ _id: req.user._id }, { token: '' });
 
@@ -106,10 +95,6 @@ app.get('/api/users/logout', auth, async (req, res) => {
    } catch (err) {
       return res.json({ success: false, err });
    }
-});
-
-app.get('/api/hello', (req, res) => {
-   res.send('Hello World Axois');
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
