@@ -108,7 +108,7 @@ app.get('/api/users/logout', auth, async (req, res) => {
    }
 });
 
-app.get('/', (req, res) => {
+app.get('/api/hello', (req, res) => {
    res.send('Hello World Axois');
 });
 
