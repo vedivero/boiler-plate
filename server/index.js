@@ -108,4 +108,8 @@ app.get('/api/users/logout', auth, async (req, res) => {
    }
 });
 
+app.get('/', (req, res) => {
+   res.send('Hello World Axois');
+});
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
