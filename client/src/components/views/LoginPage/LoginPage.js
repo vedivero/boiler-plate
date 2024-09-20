@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../../_actions/user_action';
+import Auth from '../../../hoc/auth';
 
 const LoginPage = () => {
    const dispatch = useDispatch();
-   const [Email, setEamil] = useState('');
+   const [Email, setEmail] = useState(''); // 수정: setEamil -> setEmail
    const [Password, setPassword] = useState('');
    const navigate = useNavigate();
 
-   const onEamilHandler = (e) => {
-      setEamil(e.target.value);
+   const onEmailHandler = (e) => {
+      setEmail(e.target.value);
    };
 
    const onPasswordHandler = (e) => {
@@ -18,8 +19,6 @@ const LoginPage = () => {
    };
 
    const onSubmitHandler = (e) => {
-      console.log('로그인 시도');
-      console.log(e);
       e.preventDefault();
 
       let body = {
@@ -30,19 +29,14 @@ const LoginPage = () => {
       dispatch(loginUser(body))
          .then((response) => {
             if (response.payload.loginSuccess) {
-               console.log('로그인 성공');
                navigate('/');
             } else {
                alert('Error');
             }
          })
          .catch((error) => {
-            if (error.name === 'AbortError') {
-               console.log('요청이 취소되었습니다.');
-            } else {
-               console.error('로그인 중 에러 발생:', error);
-               alert('로그인 요청 실패');
-            }
+            console.error('로그인 중 에러 발생:', error);
+            alert('로그인 요청 실패');
          });
    };
 
@@ -61,7 +55,7 @@ const LoginPage = () => {
             onSubmit={onSubmitHandler}
          >
             <label>Email</label>
-            <input type='email' value={Email} onChange={onEamilHandler} />
+            <input type='email' value={Email} onChange={onEmailHandler} />
             <label>Password</label>
             <input
                type='password'
@@ -75,4 +69,4 @@ const LoginPage = () => {
    );
 };
 
-export default LoginPage;
+export default Auth(LoginPage, false);
