@@ -8,7 +8,6 @@ const LoginPage = () => {
    const [Email, setEamil] = useState('');
    const [Password, setPassword] = useState('');
    const navigate = useNavigate();
-   const [abortController, setAbortController] = useState(null);
 
    const onEamilHandler = (e) => {
       setEamil(e.target.value);
@@ -28,18 +27,8 @@ const LoginPage = () => {
          password: Password,
       };
 
-      const controller = new AbortController();
-      setAbortController(controller);
-
-      const timeoutId = setTimeout(() => {
-         controller.abort();
-         alert('로그인 요청 시간이 초과되었습니다. 페이지를 새로 고칩니다.');
-         window.location.reload(); // 페이지 리로드
-      }, 4000); // 4초 타임아웃
-
-      dispatch(loginUser(body, { signal: controller.signal }))
+      dispatch(loginUser(body))
          .then((response) => {
-            clearTimeout(timeoutId); // 성공적으로 응답이 오면 타임아웃 클리어
             if (response.payload.loginSuccess) {
                console.log('로그인 성공');
                navigate('/');
@@ -48,7 +37,6 @@ const LoginPage = () => {
             }
          })
          .catch((error) => {
-            clearTimeout(timeoutId); // 에러가 발생하면 타임아웃 클리어
             if (error.name === 'AbortError') {
                console.log('요청이 취소되었습니다.');
             } else {
