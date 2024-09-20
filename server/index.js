@@ -23,9 +23,10 @@ mongoose
    .catch((err) => console.log(err));
 
 app.get('/', (req, res) => res.send('Hello World'));
+app.get('/hello', (req, res) => res.send('hello world'));
 
 // 회원 가입
-app.post('/register', async (req, res) => {
+app.post('/users/register', async (req, res) => {
    const user = new User(req.body);
    try {
       await user.save();
